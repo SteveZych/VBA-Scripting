@@ -1,0 +1,61 @@
+Sub wallStreet()
+    
+
+    'loop through all work sheets
+     For Each ws In Worksheets
+    
+        lastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        lastYearlyRow = ws.Cells(Rows.Count, 10).End(xlUp).Row
+        'lastPercentRow = ws.Cells(Rows.Count, 11).End(xlUp).Row
+        
+        'insert new columns and name them
+        ws.Range("I1") = "Ticker"
+        
+        ws.Range("J1") = "Yearly Change"
+        
+        ws.Range("K1") = "Percent Change"
+        
+        ws.Range("L1") = "Total Stock Volume"
+        
+        
+        'ticker counter to track the cell number added to ticker column
+        tickerCounter = 2
+        'open price helps calculate yearly change and value changes when ticker changes
+        openPrice = ws.Cells(2, 3).Value
+        
+        'loop through all rows for ticker value
+        For i = 2 To lastRow
+            
+                'Calculate total volume of stock added to current volume cell
+                ws.Cells(tickerCounter, 12).Value = ws.Cells(tickerCounter, 12).Value + ws.Cells(i, 7).Value
+            
+            'if the ticker value changes, add to ticker column
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+                'value of ticker in ticker column
+                ws.Cells(tickerCounter, 9).Value = ws.Cells(i, 1).Value
+                
+                'Calculate yearly change, Closing price minus open price
+                ws.Cells(tickerCounter, 10).Value = ws.Cells(i, 6).Value - openPrice
+                If ws.Cells(tickerCounter, 10).Value >= 0 Then
+                    ws.Cells(tickerCounter, 10).Interior.ColorIndex = 4
+                Else
+                    ws.Cells(tickerCounter, 10).Interior.ColorIndex = 3
+                End If
+                
+                'Calculate opening from closing percent change added to current percent cell
+                '(current price / previous price) - 1
+                ws.Cells(tickerCounter,11).NumberFormat = "0.00%"
+                ws.Cells(tickerCounter, 11).Value = (ws.Cells(i, 6).Value / openPrice) - 1
+                openPrice = ws.Cells(i + 1, 3).Value
+                    if openPrice = 0 Then
+                        openPrice = 1
+                    End if
+                
+                'Increase ticker count by 1 to start calculations below the previous ticker
+                tickerCounter = tickerCounter + 1
+                
+            End If
+        Next i
+             
+    Next ws
+End Sub
